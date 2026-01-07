@@ -33,7 +33,7 @@ Materials prepared for the expert assessment of the calculated trend.
 
 ## Data availability
 
-The raw species records data are protected by a code of conduct common to BDM and Info Fauna but may be obtained upon request (see BDM and info fauna ). BDM data are also available from butterfly monitoring schemes (eBMS ). Species records data of Info Fauna at a coarser spatial resolution are available from the GBIF database .
+The raw species records data are protected by a code of conduct common to BDM and Info Fauna but may be obtained upon request (see [BDM](https://www.biodiversitymonitoring.ch/) and [info fauna](https://www.infofauna.ch/)). BDM data are also available from butterfly monitoring schemes ([eBMS](https://butterfly-monitoring.net/) ). Species records data of Info Fauna at a coarser spatial resolution are available from the [GBIF database](https://doi.org/10.15468/atyl1j).
 
 ## Acknowledgements
 The Swiss Federal Oﬃce for the Environment ([FOEN](https://www.bafu.admin.ch/en)) kindly provided the BDM data and supported the development of the Swiss Butterfly Index. We are greatly thankful to all project managers, experts, and naturalist, who provided species data to the [info fauna](https://www.infofauna.ch/) database and the dedicated team who conducted the fieldwork for the [BDM](https://www.biodiversitymonitoring.ch/index.php/en/). We thank Luna Sartori for valuable help in data provision.
