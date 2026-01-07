@@ -34,8 +34,8 @@ dat <- read_csv("Tables/results.csv", col_types = "ciddddddddic") %>%
   filter(year >= 2003)
 
 # Load species list
-species <- read_excel("Tables/Appendix_Species-List_v3.xlsx") %>% 
-  filter(bdm_n_stao >= 20)
+species <- read_excel("Tables/Appendix_Species-List.xlsx") %>% 
+  filter(bdm_n_squares >= 20)
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Compile result per model and species----
@@ -71,6 +71,19 @@ for(i in 1:nrow(species)) {
   }
 }
 
+# Save file for review
+species %>% 
+  transmute(
+    NUESP, 
+    Species_Name, 
+    `BDM-Reference` = `BDM-only` %>% round(3), 
+    `a-number-squares` = `infospecies-raw` %>% round(3),
+    `b-occupied` = `infospecies-occupancy` %>% round(3),
+    `c-reportingtyp` = `infospecies-reportingtyp` %>% round(3),
+    `d-randomyear-GLM` = `infospecies-randomyear-GLM` %>% round(3),
+    `e-siteoccupancy` = siteoccupancy %>% round(3)) %>% 
+  openxlsx::write.xlsx("Review/Campare_estimated_trends.xlsx")
+  
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Calculate correlation and bias ----
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

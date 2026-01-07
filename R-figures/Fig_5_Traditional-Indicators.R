@@ -25,6 +25,9 @@ theme_set(
 )
 options(ggplot2.discrete.colour= c("#1F78B4", "#FF7F00", "#33A02C", "#E31A1C", "#6A3D9A"))
 
+# Link zur BDM Datenbank
+db <- DBI::dbConnect(RSQLite::SQLite(), "~/OneDrive - Hintermann + Weber AG/BDM_DB/DB_BDM_2025-06-02.db")
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Hilfsfunktionen ----
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -63,7 +66,7 @@ load("Data/bdm.RData")
 load("Data/survBDM.RData")
 
 # Load species list
-species <- read_excel("Tables/Appendix_Species-List_v3.xlsx") 
+species <- read_excel("Tables/Appendix_Species-List.xlsx") 
 
 # Calculate indicators based on all records
 res <- survBDM %>% 
@@ -149,8 +152,71 @@ ggsave("Figures/Fig5-traditional_indicators.pdf", width = 12, height = 4)
 
 # Temporal Trends
 lm(log(SR) ~ year, data = res) %>% summary
+tmp <- lm(SR ~ yr, data = res %>% mutate(yr = year-2003))
+(20 * coef(tmp)[2]) / coef(tmp)[1]
 lm(log(Ind) ~ year, data = res) %>% summary
 lm(logit(Z12) ~ year, data = res) %>% summary
 
 # Korrelation
 cor.test(res$SR, res$Ind)
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Species with strongest impact on species richness ----
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Calculate species effects
+refSR <- coef(lm(log(SR) ~ year, data = res))[2]
+for(s in 1:nrow(species)){
+  res1 <- survBDM %>% 
+    left_join(
+      bdm %>% 
+        filter(NUESP != species$NUESP[s]) %>% 
+        left_join(survBDM) %>% 
+        group_by(aID_KD) %>% 
+        dplyr::summarise(
+          SR = n_distinct(NUESP),
+          ind = sum(Ind, na.rm = TRUE)
+        ) 
+    ) %>% 
+    group_by(year) %>% 
+    dplyr::summarise(
+      SR = mean(SR),
+      Ind = mean(ind)
+    ) %>% 
+    replace_na(list(SR = 0))
+  species$eff_SR[s] <- (coef(lm(log(SR) ~ year, data = res1))[2] - refSR) * 1000
+}
+ausw <- species %>% 
+  transmute(NUESP, aID_SP, Species_Name, bdm_n_squares, eff_SR) %>% 
+  left_join(tbl(db, "Traits_TF") %>% transmute(aID_SP, Waermetyp, vagabundierend, Nutrient), copy = TRUE) %>% 
+  arrange(eff_SR)
+mean((
+  ausw$Waermetyp >=4 & !is.na(ausw$Waermetyp)) &
+    (ausw$vagabundierend == 1 & !is.na(ausw$vagabundierend))
+)
+
+# Calculate indicators removing the x most extreme species
+x <- 7 # p > 0.05
+res2 <- survBDM %>% 
+  left_join(
+    bdm %>% 
+      filter(!(NUESP %in% ausw$NUESP[1:x])) %>% 
+      left_join(survBDM) %>% 
+      group_by(aID_KD) %>% 
+      dplyr::summarise(
+        SR = n_distinct(NUESP),
+        ind = sum(Ind, na.rm = TRUE)
+      ) 
+  ) %>% 
+  group_by(year) %>% 
+  dplyr::summarise(
+    SR = mean(SR),
+    Ind = mean(ind)
+  ) %>% 
+  replace_na(list(SR = 0))
+lm(log(SR) ~ year, data = res2) %>% summary
+tmp <- lm(SR ~ yr, data = res2 %>% mutate(yr = year-2003))
+(20 * coef(tmp)[2]) / coef(tmp)[1]
+
+
+
