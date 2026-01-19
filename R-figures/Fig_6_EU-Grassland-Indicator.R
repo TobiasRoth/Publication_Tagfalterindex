@@ -39,7 +39,7 @@ dat <- read_csv("Tables/results.csv", col_types = "ciddddddddic") %>%
   filter(runID %in% c("2025_siteoccupancy_v2"))
 
 # Load species list
-species <- read_excel("Tables/Appendix_Species-List_v3.xlsx") %>% 
+species <- read_excel("Tables/Appendix_Species-List.xlsx") %>% 
   left_join(tbl(db, "Traits_TF") %>% transmute(aID_SP, EU_Grassland_Indicator), copy = TRUE)
 
 # Load and prepare data from European Grassland Indicator

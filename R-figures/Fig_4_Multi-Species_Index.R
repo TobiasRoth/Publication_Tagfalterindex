@@ -25,7 +25,7 @@ theme_set(
 options(ggplot2.discrete.colour= c("#1F78B4", "#FF7F00", "#33A02C", "#E31A1C", "#6A3D9A"))
 
 # Uper limit for y-axis
-ylimup <- 160
+ylimup <- 201
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Load data ----
@@ -40,7 +40,8 @@ dat <- read_csv("Tables/results.csv", col_types = "ciddddddddic") %>%
 
 # Load species list
 species <- read_excel("Tables/Appendix_Species-List.xlsx") %>% 
-  left_join(tbl(db, "Traits_TF") %>% transmute(aID_SP, Waermetyp, vagabundierend, Nutrient), copy = TRUE)
+  left_join(tbl(db, "Traits_TF") %>% transmute(aID_SP, Waermetyp, vagabundierend, Nutrient), copy = TRUE) %>% 
+  replace_na(list(if_n_obs = 0, if_n_squares = 0, bdm_n_obs = 0, bdm_n_squares = 0))
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Functions ----
@@ -182,7 +183,7 @@ tmp <- tibble(
     sum(trends$trend > 0 & trends$p > 0.05),
     sum(trends$trend < 0 & trends$p <= 0.05),
     sum(trends$trend < 0 & trends$p > 0.05),
-    sum(species$Berechnung_TFI == "nein")) 
+    sum(species$Trend_calculated == 0)) 
 ) %>% 
   mutate(label = paste0(value))
 tmp$ant = tmp$value / sum(tmp$value)
@@ -224,7 +225,7 @@ ggsave("Figures/Fig4-main-results_all-species.pdf", width = 12, height = 6)
 # All species
 tcol <- "grey30"
 tt <- dat %>% 
-  filter(!is.na(match(NUESP, species$NUESP[species$Trend_verwenden %in% c("ja", "BDM")])))
+  filter(!is.na(match(NUESP, species$NUESP[species$Expert_review == 1 & !is.na(species$Expert_review)])))
 
 pall <- tt %>%
   getartgruppentrend %>% 
@@ -245,7 +246,7 @@ pall <- tt %>%
 # Cold adapted species
 tcol <- "#56B4E9"
 tt <- dat %>% 
-  filter(!is.na(match(NUESP, species$NUESP[species$Trend_verwenden %in% c("ja", "BDM")]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$Expert_review == 1 & !is.na(species$Expert_review)]))) %>% 
   filter(!is.na(match(NUESP, species$NUESP[!is.na(species$Waermetyp) & species$Waermetyp <= 2])))
 pkz <- tt %>%
   getartgruppentrend %>% 
@@ -265,7 +266,7 @@ pkz <- tt %>%
 # Warm adapted species
 tcol <- "brown2"
 tt <- dat %>% 
-  filter(!is.na(match(NUESP, species$NUESP[species$Trend_verwenden %in% c("ja", "BDM")]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$Expert_review == 1 & !is.na(species$Expert_review)]))) %>% 
   filter(!is.na(match(NUESP, species$NUESP[!is.na(species$Waermetyp) & species$Waermetyp >= 4]))) 
 pwz <- tt %>% 
   getartgruppentrend %>%
@@ -285,7 +286,7 @@ pwz <- tt %>%
 # Species of oligotrophic habitats
 tcol <- "khaki2"
 tt <- dat %>% 
-  filter(!is.na(match(NUESP, species$NUESP[species$Trend_verwenden %in% c("ja", "BDM")]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$Expert_review == 1 & !is.na(species$Expert_review)]))) %>% 
   filter(!is.na(match(NUESP, species$NUESP[!is.na(species$Nutrient) & species$Nutrient <= 3])))
 pna <- tt %>%
   getartgruppentrend %>% 
@@ -305,7 +306,7 @@ pna <- tt %>%
 # Mobile species
 tcol <- "mediumpurple1"
 tt <- dat %>% 
-  filter(!is.na(match(NUESP, species$NUESP[species$Trend_verwenden %in% c("ja", "BDM")]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$Expert_review == 1 & !is.na(species$Expert_review)]))) %>% 
   filter(!is.na(match(NUESP, species$NUESP[!is.na(species$vagabundierend) & species$vagabundierend == 1]))) 
 pma <- tt %>% 
   getartgruppentrend %>%
@@ -326,7 +327,7 @@ pma <- tt %>%
 # Anteil der Arten mit positiver und negativer Entwicklung
 tcol <- c("#33A02C", "#B2DF8A", "#FF7F00", "#FF7F0080", "grey")
 trends <- dat %>% 
-  filter(!is.na(match(NUESP, species$NUESP[species$Trend_verwenden %in% c("ja", "BDM")]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$Expert_review == 1 & !is.na(species$Expert_review)]))) %>% 
   group_by(NUESP) %>% 
   dplyr::summarise(
     trend = coef(lm(mittel ~ year))[2],
@@ -342,7 +343,7 @@ tmp <- tibble(
     sum(trends$trend > 0 & trends$p > 0.05),
     sum(trends$trend < 0 & trends$p <= 0.05),
     sum(trends$trend < 0 & trends$p > 0.05),
-    sum(species$Trend_verwenden == "nein")) 
+    sum(species$Trend_calculated == 0 | species$Expert_review == 0 | is.na(species$Expert_review)))
 ) %>% 
   mutate(label = paste0(value))
 tmp$ant = tmp$value / sum(tmp$value)
@@ -536,4 +537,169 @@ FFDE
 pdu + pkz + pwz + pna + pma + pall +
   plot_layout(design = layout)
 ggsave("Figures/Fig4-main-results_morethan400.pdf", width = 12, height = 6)
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Figure: remove species with obs < 400, remove 1990 and 1991 ----
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# All species
+tcol <- "grey30"
+tt <- dat %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$if_n_obs > 400])))
+
+pall <- tt %>%
+  getartgruppentrend %>% 
+  ggplot(aes(x = year, y = CI, ymin = lo, ymax = hi)) +
+  geom_abline(slope = 0, intercept = 100, col = "grey", lty = 2) +
+  geom_point(cex = 2) +
+  geom_line() +
+  geom_errorbar(width=.1, lwd = 0.3) +
+  geom_smooth(method = lm, , col = tcol, fill = tcol) + 
+  ylim(0, ylimup) +
+  xlim(1991.5, 2023.5) +
+  labs(
+    title = "(d) Butterfly species index",
+    subtitle = paste(n_distinct(tt$NUESP), "species"),
+    x = "", 
+    y = "Multi-species index") +
+  theme(legend.position = "none")
+
+# Cold adapted species
+tcol <- "#56B4E9"
+tt <- dat %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$if_n_obs > 400]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[!is.na(species$Waermetyp) & species$Waermetyp <= 2])))
+pkz <- tt %>%
+  getartgruppentrend %>% 
+  ggplot(aes(x = year, y = CI, ymin = lo, ymax = hi)) +
+  geom_abline(slope = 0, intercept = 100, col = "grey", lty = 2) +
+  geom_point(cex = 1.5) +
+  geom_line() +
+  geom_errorbar(width=.1, lwd = 0.3) +
+  geom_smooth(method = lm, , col = tcol, fill = tcol) + 
+  ylim(0, ylimup) +
+  xlim(1991.5, 2023.5) +
+  labs(
+    title = "(b) Cold-adapted species",
+    subtitle = paste(n_distinct(tt$NUESP), "species"),
+    x = "", 
+    y = "Multi-species index")  
+
+# Warm adapted species
+tcol <- "brown2"
+tt <- dat %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$if_n_obs > 400]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[!is.na(species$Waermetyp) & species$Waermetyp >= 4]))) 
+pwz <- tt %>% 
+  getartgruppentrend %>%
+  ggplot(aes(x = year, y = CI, ymin = lo, ymax = hi)) +
+  geom_abline(slope = 0, intercept = 100, col = "grey", lty = 2) +
+  geom_point(cex = 1.5) +
+  geom_line() +
+  geom_errorbar(width=.1, lwd = 0.3) +
+  geom_smooth(method = lm, , col = tcol, fill = tcol) + 
+  ylim(0, ylimup) +
+  xlim(1991.5, 2023.5) +
+  labs(
+    title = "(c) Warm-adapted species",
+    subtitle = paste(n_distinct(tt$NUESP), "species"),
+    x = "", 
+    y = "Multi-species index") 
+
+# Species of oligotrophic habitats
+tcol <- "khaki2"
+tt <- dat %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$if_n_obs > 400]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[!is.na(species$Nutrient) & species$Nutrient <= 3])))
+pna <- tt %>%
+  getartgruppentrend %>% 
+  ggplot(aes(x = year, y = CI, ymin = lo, ymax = hi)) +
+  geom_abline(slope = 0, intercept = 100, col = "grey", lty = 2) +
+  geom_point(cex = 1.5) +
+  geom_line() +
+  geom_errorbar(width=.1, lwd = 0.3) +
+  geom_smooth(method = lm, , col = tcol, fill = tcol) + 
+  ylim(0, ylimup) +
+  xlim(1991.5, 2023.5) +
+  labs(
+    title = "(e) Species of oligotrophic habitats",
+    subtitle = paste(n_distinct(tt$NUESP), "species"),
+    x = "", 
+    y = "Multi-species index") 
+
+# Mobile species
+tcol <- "mediumpurple1"
+tt <- dat %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$if_n_obs > 400]))) %>% 
+  filter(!is.na(match(NUESP, species$NUESP[!is.na(species$vagabundierend) & species$vagabundierend == 1]))) 
+pma <- tt %>% 
+  getartgruppentrend %>%
+  ggplot(aes(x = year, y = CI, ymin = lo, ymax = hi)) +
+  geom_abline(slope = 0, intercept = 100, col = "grey", lty = 2) +
+  geom_point(cex = 1.5) +
+  geom_line() +
+  geom_errorbar(width=.1, lwd = 0.3) +
+  geom_smooth(method = lm, , col = tcol, fill = tcol) + 
+  ylim(0, ylimup) +
+  labs(
+    title = "(f) Mobile species",
+    subtitle = paste(n_distinct(tt$NUESP), "species"),
+    x = "", 
+    y = "Multi-species index") 
+
+
+# Anteil der Arten mit positiver und negativer Entwicklung
+tcol <- c("#33A02C", "#B2DF8A", "#FF7F00", "#FF7F0080", "grey")
+trends <- dat %>% 
+  filter(!is.na(match(NUESP, species$NUESP[species$if_n_obs > 400]))) %>% 
+  filter(year >= 1992) %>% 
+  group_by(NUESP) %>% 
+  dplyr::summarise(
+    trend = coef(lm(mittel ~ year))[2],
+    p = summary(lm(mittel ~ year))$coefficients[2, 4]
+  )
+tmp <- tibble(
+  `Species trends` = 
+    factor(
+      c("positive (significant)", "positive (not significant)",  "negative (significant)", "negative (not significant)", "insufficient data"), 
+      levels = c("positive (significant)", "positive (not significant)", "negative (significant)", "negative (not significant)", "insufficient data")),
+  value = c(
+    sum(trends$trend > 0 & trends$p <= 0.05),
+    sum(trends$trend > 0 & trends$p > 0.05),
+    sum(trends$trend < 0 & trends$p <= 0.05),
+    sum(trends$trend < 0 & trends$p > 0.05),
+    sum(species$if_n_obs <= 400)) 
+) %>% 
+  mutate(label = paste0(value))
+tmp$ant = tmp$value / sum(tmp$value)
+tmp$ymax = cumsum(tmp$ant)
+tmp$ymin = c(0, head(tmp$ymax, n=-1))
+tmp$labelPosition <- (tmp$ymax + tmp$ymin) / 2
+pdu <- tmp %>% 
+  ggplot(aes(ymax = ymax, ymin = ymin, xmax = 5, xmin = 4, fill = `Species trends`)) +
+  geom_rect() +
+  coord_polar(theta = "y") + 
+  scale_x_continuous(expand = c(-0.15, 0), limits = c(3, 5)) +
+  labs(
+    title = "(a) Share of increasing vs. decreasing trends",
+    subtitle = paste(sum(tmp$value), "species")
+  ) +
+  theme_void() +
+  theme(
+    legend.position = c(1, 0.5),
+    legend.justification = c(0, 0.5),
+    legend.direction = "vertical", 
+    plot.title.position = "plot"
+  ) +
+  geom_text(x = 4.5, aes(y = labelPosition, label=label), size=4, col = "white") +
+  scale_fill_manual(values = tcol) 
+
+# Make figure
+layout <- "
+A#BC
+FFDE
+"
+pdu + pkz + pwz + pna + pma + pall +
+  plot_layout(design = layout)
+ggsave("Figures/Fig4-main-results_morethan400_from1992.pdf", width = 12, height = 6)
 

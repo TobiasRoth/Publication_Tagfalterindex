@@ -93,7 +93,7 @@ t1 <- cor.test(species$`BDM-only`, species$`infospecies-raw`, paired = TRUE)
 t2 <- t.test(species$`infospecies-raw`, species$`BDM-only`, paired = TRUE)
 p1 <- species %>% 
   ggplot(aes(x = `BDM-only`, y = `infospecies-raw`)) +
-  geom_point() +
+  geom_point(size = 0.5) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
   # geom_smooth(method = "lm", color = "orange") +
   labs(
@@ -110,7 +110,7 @@ t1 <- cor.test(species$`BDM-only`, species$`infospecies-occupancy`, paired = TRU
 t2 <- t.test(species$`infospecies-occupancy`, species$`BDM-only`, paired = TRUE)
 p2 <- species %>% 
   ggplot(aes(x = `BDM-only`, y = `infospecies-occupancy`)) +
-  geom_point() +
+  geom_point(size = 0.5) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
   # geom_smooth(method = "lm", color = "orange") +
   labs(
@@ -127,7 +127,7 @@ t1 <- cor.test(species$`BDM-only`, species$`infospecies-reportingtyp`, paired = 
 t2 <- t.test(species$`infospecies-reportingtyp`, species$`BDM-only`, paired = TRUE)
 p3 <- species %>% 
   ggplot(aes(x = `BDM-only`, y = `infospecies-reportingtyp`)) +
-  geom_point() +
+  geom_point(size = 0.5) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
   # geom_smooth(method = "lm", color = "orange") +
   labs(
@@ -144,7 +144,7 @@ t1 <- cor.test(species$`BDM-only`, species$`infospecies-randomyear-GLM`, paired 
 t2 <- t.test(species$`infospecies-randomyear-GLM`, species$`BDM-only`, paired = TRUE)
 p4 <- species %>% 
   ggplot(aes(x = `BDM-only`, y = `infospecies-randomyear-GLM`)) +
-  geom_point() +
+  geom_point(size = 0.5) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
   # geom_smooth(method = "lm", color = "orange") +
   labs(
@@ -161,7 +161,7 @@ t1 <- cor.test(species$`BDM-only`, species$siteoccupancy, paired = TRUE)
 t2 <- t.test(species$siteoccupancy, species$`BDM-only`, paired = TRUE)
 p5 <- species %>% 
   ggplot(aes(x = `BDM-only`, y = siteoccupancy)) +
-  geom_point() +
+  geom_point(size = 0.5) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
   # geom_smooth(method = "lm", color = "#33A02C") +
   labs(
@@ -172,39 +172,68 @@ p5 <- species %>%
   ) +
   ylim(-10, 35) +
   xlim(-10, 35)
-s = 36
+
+# Cupido argiades
+s = 37
+p5 <- p5 + 
+  annotate(geom = "curve", 
+           xend = species$`BDM-only`[s], 
+           yend = species$siteoccupancy[s] -0.5, 
+           x = 25, y = 14, 
+           col = "black", curvature = -.3, arrow = arrow(length = unit(2, "mm"))) +
+  annotate(geom = "text", x = 25, y = 13, label = species$Species_Name[s], hjust = "center")
+
+# Nymphalis antiopa
+s = 92
+p5 <- p5 + 
+  annotate(geom = "curve", 
+           xend = species$`BDM-only`[s] + 0.5, 
+           yend = species$siteoccupancy[s] + 0.2, 
+           x = 8.5, y = 15.5, 
+           col = "black", curvature = -.3, arrow = arrow(length = unit(2, "mm"))) +
+  annotate(geom = "text", x = 8, y = 16, label = species$Species_Name[s], hjust = "center")
+
+# Parnassius phoebus
+s = 106
 p5 <- p5 + 
   annotate(geom = "curve", 
            xend = 1 * species$`BDM-only`[s], 
            yend = 0.98 * species$siteoccupancy[s], 
-           x = 30, y = 14, 
-           col = "black", curvature = -.3, arrow = arrow(length = unit(2, "mm"))) +
-  annotate(geom = "text", x = 30, y = 13, label = species$Species_Name[s], hjust = "center")
-s = 91
+           x = -3, y = 3, 
+           col = "black", curvature = .3, arrow = arrow(length = unit(2, "mm"))) +
+  annotate(geom = "text", x = -6.5, y = 4, label = species$Species_Name[s], hjust = "center")
+
+# Polyommatus dorylas
+s = 112
 p5 <- p5 + 
   annotate(geom = "curve", 
-           xend = 1.0 * species$`BDM-only`[s], 
-           yend = 1.06 * species$siteoccupancy[s], 
-           x = 3, y = 21, 
-           col = "black", curvature = -.3, arrow = arrow(length = unit(2, "mm"))) +
-  annotate(geom = "text", x = 0, y = 22, label = species$Species_Name[s], hjust = "center")
-s = 116
+           xend = species$`BDM-only`[s] - 0.2, 
+           yend = species$siteoccupancy[s] - 0.2, 
+           x = 0, y = -7, 
+           col = "black", curvature = -.4, arrow = arrow(length = unit(2, "mm"))) +
+  annotate(geom = "text", x = 0, y = -8, label = species$Species_Name[s], hjust = "center")
+
+# Euphydryas aurinia
+s = 64
 p5 <- p5 + 
   annotate(geom = "curve", 
-           xend = species$`BDM-only`[s], 
-           yend = 0.8 * species$siteoccupancy[s], 
-           x = -4, y = 6, 
+           xend = species$`BDM-only`[s] + 0.5, 
+           yend = species$siteoccupancy[s], 
+           x = 4, y = -3, 
            col = "black", curvature = -.3, arrow = arrow(length = unit(2, "mm"))) +
-  annotate(geom = "text", x = -4, y = 7, label = species$Species_Name[s], hjust = "center")
-s = 35
+  annotate(geom = "text", x = 10, y = -3, label = species$Species_Name[s], hjust = "center")
+
+# Gonepteryx rhamni
+s = 61
 p5 <- p5 + 
   annotate(geom = "curve", 
-           xend = species$`BDM-only`[s], 
-           yend = 0.95 * species$siteoccupancy[s], 
-           x = 15, y = -1, 
+           xend = species$`BDM-only`[s] - 0.2, 
+           yend = species$siteoccupancy[s] + 0.5, 
+           x = -2, y = 10, 
            col = "black", curvature = -.3, arrow = arrow(length = unit(2, "mm"))) +
-  annotate(geom = "text", x = 15, y = -2, label = species$Species_Name[s], hjust = "left")
+  annotate(geom = "text", x = -5, y = 11, label = species$Species_Name[s], hjust = "center")
 p5
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Make plot ----
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

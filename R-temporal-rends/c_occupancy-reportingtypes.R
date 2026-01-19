@@ -15,8 +15,8 @@ library(arm)
 load("Data/cscf.RData")
 
 # Load species list
-species <- read_excel("Tables/Appendix_Species-List_v3.xlsx") %>% 
-  filter(bdm_n_stao >= 20)
+species <- read_excel("Tables/Appendix_Species-List.xlsx") %>% 
+  filter(bdm_n_squares >= 20)
 
 # Name of the model type"
 runName <- "infospecies-reportingtyp"

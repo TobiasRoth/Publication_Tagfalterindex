@@ -43,8 +43,14 @@ load("~/Dropbox/3_Ressourcen/Datengrundlagen/Kartengrundlagen/gewaesser.RData")
 db <- DBI::dbConnect(RSQLite::SQLite(), "~/OneDrive - Hintermann + Weber AG/BDM_DB/DB_BDM_2025-06-02.db")
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Some stats of the two datasets ----
+# Some stats of the studey site and the two datasets ----
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Regions of Switzerland
+tt <- st_read("~/OneDrive - Hintermann + Weber AG/Datengrundlagen/BGR/BGR.gpkg")
+round(100 * sum(tt %>% filter(DERegionNa == "Mittelland") %>% st_area()) / (41285 * 1000^2) ,1)
+round(100 * sum(tt %>% filter(DERegionNa == "Jura") %>% st_area()) / (41285 * 1000^2) ,1)
+100 - 27.3 - 10.1
 
 # Info fauna
 nrow(cscf)

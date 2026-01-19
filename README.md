@@ -1,6 +1,6 @@
 Combining Citizen-Science Data with Data from a Structured Monitoring Programme for a Swiss Butterfly Index
 =====
-This repository contains the r-script and results for the following manuscript to be submitted to [Ecological Indicators](https://www.sciencedirect.com/journal/ecological-indicators)
+This repository contains the r-scripts and results for the following manuscript to be submitted to [Ecological Indicators](https://www.sciencedirect.com/journal/ecological-indicators):
 
 > Roth T., Chittaro Y., Frei J., Litsios G., Plattner M. (2026). Combining Citizen-Science Data with Data from a Structured Monitoring Programme for a Swiss Butterfly Index.
 

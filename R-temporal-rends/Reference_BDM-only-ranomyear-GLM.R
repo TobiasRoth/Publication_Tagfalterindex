@@ -14,8 +14,8 @@ load("Data/bdm.RData")
 load("Data/survBDM.RData")
 
 # Load species list
-species <- read_excel("Tables/Appendix_Species-List_v3.xlsx") %>% 
-  filter(bdm_n_stao >= 20)
+species <- read_excel("Tables/Appendix_Species-List.xlsx") %>% 
+  filter(bdm_n_squares >= 20)
 
 # Name of the model type
 runName <- "2025_BDM_v5"
